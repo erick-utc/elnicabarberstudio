@@ -1,0 +1,129 @@
+<x-app-layout>
+    <x-slot name="header">
+         <div class="flex justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Citas | Editar') }}
+            </h2>
+            @can('ver citas')
+            <x-nav-link href="{{ route('cita.index') }}" class="bg-gray-700 text-white hover:text-white px-2 py-2 pt-2 rounded-md inline-block flex items-center">
+                {{ __('Volver a Citas') }}
+            </x-nav-link>
+            @endcan
+         </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-4">
+                <!-- <x-welcome /> -->
+                 <form action="{{ route('cita.update', $cita->id) }}" method="POST">
+                    @csrf
+                    <div>
+                        {{-- <label for="name" class="text-lg font-medium">Nombre</label>
+                        <div class="my-3">
+                            <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="name" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg">
+                            @error('name')
+                                <p class="text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div> --}}
+                        <label for="barbero_id" class="text-lg font-medium">Barbero</label>
+                        <div class="my-3">
+                            {{-- <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="user_id" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg"> --}}
+                            <select name="barbero_id" class="border-gray-300 shadow-sm w-1/2 rounded-lg" id="barbero" value="{{ old('barbero_id', $cita->barbero->id) }}">
+                                @foreach ($barberos as $user)
+                                <option value="{{ $user->id }}" @selected(($user->name == Auth::user()->name)&&($user->primerApellido == Auth::user()->primerApellido)&&($user->segundoApellido == Auth::user()->segundoApellido))>{{ $user->name.' '.$user->primerApellido.' '.$user->segundoApellido }}</option>
+                                @endforeach
+                            </select>
+                            @error('barbero_id')
+                                <p class="text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <label for="cliente_id" class="text-lg font-medium">Cliente</label>
+                        <div class="my-3">
+                            {{-- <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="user_id" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg"> --}}
+                            <select name="cliente_id" class="border-gray-300 shadow-sm w-1/2 rounded-lg" value="{{ old('cliente_id', $cita->cliente->id) }}">
+                                @foreach ($clientes as $user)
+                                <option value="{{ $user->id }}" @selected(($user->name == Auth::user()->name)&&($user->primerApellido == Auth::user()->primerApellido)&&($user->segundoApellido == Auth::user()->segundoApellido))>{{ $user->name.' '.$user->primerApellido.' '.$user->segundoApellido }}</option>
+                                @endforeach
+                            </select>
+                            @error('cliente_id')
+                                <p class="text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <label for="paquete_id" class="text-lg font-medium">Paquete</label>
+                        <div class="my-3">
+                            {{-- <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="user_id" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg"> --}}
+                            <select name="paquete_id" class="border-gray-300 shadow-sm w-1/2 rounded-lg" value="{{ old('paquete_id', $cita->paquete->id) }}">
+                                @foreach ($paquetes as $paquete)
+                                <option value="{{ $paquete->id }}">{{ $paquete->nombre.' '.$paquete->descripcion }}</option>
+                                @endforeach
+                            </select>
+                            @error('paquete_id')
+                                <p class="text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        {{-- <label for="dia" class="text-lg font-medium">Dia</label>
+                        <div class="my-3">
+                            <select name="dia" class="border-gray-300 shadow-sm w-1/2 rounded-lg">
+                                @foreach (App\Enums\DiasSemana::cases() as $diaEnum)
+                                    <div class="mt-3">
+                                        <option @selected($diaEnum->name == $dia) value="{{ $diaEnum->name }}">{{ $diaEnum->name }}</option>
+                                    </div>
+                                @endforeach
+                            </select>
+                            @error('paquete_id')
+                                <p class="text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div> --}}
+                        <label for="fecha" class="text-lg font-medium">Fecha</label>
+                        <div class="my-3">
+                            <input value="{{ old('fecha', $cita->fecha) }}"name="fecha" type="date" class="border-gray-300 shadow-sm w-1/2 rounded-lg"  required>
+                            @error('fecha')
+                                <p class="text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <label for="hora" class="text-lg font-medium">Hora de la cita</label>
+                        <div class="my-3">
+                            {{-- <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="user_id" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg"> --}}
+                            <select name="hora" class="border-gray-300 shadow-sm w-1/2 rounded-lg" value="{{ old('hora', $cita->hora) }}">
+                                @foreach ($horas as $hora)
+                                <option  @selected($cita->hora == \Carbon\Carbon::parse($hora)->locale('es')->format("H:i")) value="{{ \Carbon\Carbon::parse($hora)->locale('es')->format("H:i") }}">{{ \Carbon\Carbon::parse($hora)->locale('es')->format("H:i") }}</option>
+                                @endforeach
+                            </select>
+                            @error('paquete_id')
+                                <p class="text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        {{-- <div class="my-3">
+                            <input value="{{ old('hora') }}" name="hora" type="time" class="border-gray-300 shadow-sm w-1/2 rounded-lg"  required>
+                            @error('hora')
+                                <p class="text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div> --}}
+                        {{-- <label for="fin" class="text-lg font-medium">Hora de Fin</label>
+                        <div class="my-3">
+                            <input value="{{ old('fin') }}" placeholder="Ingrese la Hora de Salida" name="fin" type="time" class="border-gray-300 shadow-sm w-1/2 rounded-lg" required>
+                            @error('fin')
+                                <p class="text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div> --}}
+                        {{-- <script>
+                            document.addEventListener("DOMContentLoaded", () => {
+                                const barberoSelect = document.getElementById('barbero');
+                                console.log(barberoSelect);
+                                if(barberoSelect) {
+                                    
+                                    console.log(barberoSelect.value);
+                                }
+                            })
+                            
+                        </script> --}}
+                        <x-button >
+                            {{ __('Guardar') }}
+                        </x-button>
+                    </div>
+                 </form>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
