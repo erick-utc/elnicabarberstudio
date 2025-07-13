@@ -133,6 +133,9 @@ Route::middleware([
     Route::get('/reportes/ganacias', [ReportesController::class, 'indexganancias'])->name('reporte.indexganancias');
     Route::post('/reportes/paquetes', [ReportesController::class, 'paquetesPorFecha'])->name('reporte.paquetesPorFecha');
     Route::post('/reportes/ganancias', [ReportesController::class, 'gananciasBarberos'])->name('reporte.gananciasBarberos');
+    Route::get('/reportes/citas', [ReportesController::class, 'citasPorFecha'])->name('reporte.citas');
+    Route::get('/reportes/clientes-frecuentes', [ReportesController::class, 'clientesFrecuentes'])->name('reporte.clientes');
+    Route::get('/reportes/uso-horario', [ReportesController::class, 'usoHorarioBarberos'])->name('reporte.uso_horario');
 
     Route::get('/barbero/horas-disponibles', [CitasController::class, 'horasNoDisponibles'])->name('barbero.horas');
 

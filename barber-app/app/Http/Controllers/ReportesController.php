@@ -11,6 +11,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReporteGananciasMail;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class ReportesController extends Controller
 {
@@ -88,6 +90,73 @@ class ReportesController extends Controller
         return view('reportes.indexganancias', compact('resultados', 'porcentaje', 'inicio', 'fin'));
     }
 
+    public function citasPorFecha(Request $request)
+    {
+        $tipo = $request->input('tipo', 'diario'); // diario, semanal, mensual
+        $fechaInicio = $request->input('fecha_inicio', now()->startOfMonth()->toDateString());
+        $fechaFin = $request->input('fecha_fin', now()->toDateString());
+
+        $query = Citas::whereBetween('fecha', [$fechaInicio, $fechaFin]);
+
+        $citas = $query->get()->groupBy(function ($cita) use ($tipo) {
+            return match($tipo) {
+                'semanal' => \Carbon\Carbon::parse($cita->fecha)->startOfWeek()->format('Y-m-d'),
+                'mensual' => \Carbon\Carbon::parse($cita->fecha)->format('Y-m'),
+                default => $cita->fecha,
+            };
+        });
+
+        return view('reportes.citas', compact('citas', 'tipo', 'fechaInicio', 'fechaFin'));
+    }
+
+    public function clientesFrecuentes(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio', now()->startOfMonth()->toDateString());
+        $fechaFin = $request->input('fecha_fin', now()->toDateString());
+
+        $frecuentes = Citas::whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->select('cliente_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('cliente_id')
+            ->orderByDesc('total')
+            ->with('cliente')
+            ->get();
+
+        return view('reportes.clientes', compact('frecuentes', 'fechaInicio', 'fechaFin'));
+    }
+
+    public function usoHorarioBarberos(Request $request)
+    {
+        $fecha = $request->input('fecha', now()->toDateString());
+        $barberos = User::role('barbero')->with(['horarios', 'citasComoBarbero' => function ($query) use ($fecha) {
+            $query->where('fecha', $fecha);
+        }])->get();
+
+        $data = [];
+
+        foreach ($barberos as $barbero) {
+            $horarios = $barbero->horarios->filter(fn($h) => in_array(\Carbon\Carbon::parse($fecha)->format('l'), $h->dias));
+            $horasDisponibles = 0;
+
+            foreach ($horarios as $h) {
+                $horasDisponibles += \Carbon\Carbon::parse($h->fin)->diffInMinutes($h->inicio);
+            }
+
+            $horasAgendadas = count($barbero->citasComoBarbero) * 30; // asumiendo 30 minutos por cita
+
+            $porcentaje = $horasDisponibles > 0
+                ? round(($horasAgendadas / $horasDisponibles) * 100, 2)
+                : 0;
+
+            $data[] = [
+                'nombre' => $barbero->name.' '.$barbero->primerApellido.' '.$barbero->segundoApellido,
+                'min_disponibles' => $horasDisponibles,
+                'min_ocupados' => $horasAgendadas,
+                'porcentaje' => $porcentaje,
+            ];
+        }
+
+        return view('reportes.uso_horario', compact('data', 'fecha'));
+    }
 }
 
 

@@ -2,12 +2,12 @@
     <x-slot name="header">
         <div class="flex justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Report de Ganancias') }}
+                {{ __('Report de Paquetes') }}
             </h2>
-            {{-- <x-search model="role" value="{{ $search }}" />
-            <x-nav-link href="{{ route('role.create') }}" class="bg-blue-500 text-white hover:text-white hover:underline px-2 py-2 pt-2 rounded-md inline-block flex items-center">
-                {{ __('Crear Nuevo') }}
-            </x-nav-link> --}}
+            {{-- <x-search model="role" value="{{ $search }}" /> --}}
+            <x-nav-link href="{{ route('reporte.index') }}" class="bg-blue-500 text-white hover:text-white hover:underline px-2 py-2 pt-2 rounded-md inline-block flex items-center">
+                {{ __('Volver a Reportes') }}
+            </x-nav-link> 
         </div>
     </x-slot>
 

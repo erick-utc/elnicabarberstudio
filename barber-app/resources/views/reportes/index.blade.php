@@ -56,6 +56,9 @@
                  <x-nav-link href="{{ route('reporte.indexganancias') }}" >Ganancias</x-nav-link> --}}
                  <x-simple-card titulo="Paquetes" descripcion="Reporta el total de reportes en un rango de fechas" url="{{ route('reporte.indexpaquetes') }}"/>
                  <x-simple-card titulo="Ganancias" descripcion="Reporta la ganacia de los barberos en un rango de fechas" url="{{ route('reporte.indexganancias') }}" />
+                 <x-simple-card titulo="Citas por día / semana / mes" descripcion="Reporta la cantidad de citas en un rango de fechas" url="{{ route('reporte.citas') }}" />
+                 <x-simple-card titulo="Clientes más frecuentes" descripcion="Reporta los clientes más frecuentes en un rango de fechas" url="{{ route('reporte.clientes') }}" />
+                 <x-simple-card titulo="Uso del horario por barbero" descripcion="Reporta el uso del horario barberos, versus la cantidad de citas en un rango de fechas" url="{{ route('reporte.uso_horario') }}" />
             </div>
         </div>
     </div>
