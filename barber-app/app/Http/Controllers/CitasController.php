@@ -44,10 +44,11 @@ class CitasController extends Controller implements HasMiddleware
             }
         }
         if($isAdmin) {
-            $citas = Citas::with(['cliente', 'barbero', 'paquete'])->paginate(10);
+            $citas = Citas::with(['cliente', 'barbero', 'paquete'])->orderBy('created_at','desc')->paginate(10);
         }else {
             $citas = Citas::where('cliente_id', $user->id)
                     ->orWhere('barbero_id', $user->id)
+                    ->orderBy('created_at','desc')
                     ->with('paquete')
                     ->paginate(10);
         }
