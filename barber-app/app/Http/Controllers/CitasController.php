@@ -172,6 +172,7 @@ class CitasController extends Controller implements HasMiddleware
         $cita->save();
 
         Mail::to($cita->cliente->email)->send(new CitaNotificadaMail($cita, EstadoCita::Creada->value));
+        Mail::to($cita->barbero->email)->send(new CitaNotificadaMail($cita, EstadoCita::Creada->value));
 
         // Citas::create($request->all());
 
@@ -204,8 +205,6 @@ class CitasController extends Controller implements HasMiddleware
         $barberos = User::role('barbero')->get();
         $clientes = User::role('cliente')->get();
         $paquetes = Paquetes::all();
-        $dia = ucfirst(Carbon::now()->locale('es')->isoFormat('dddd')); // día actual
-        $fecha = Carbon::now()->toDateString();
         $horas = [];
         $inicio = Carbon::parse('09:00');
         $fin = Carbon::parse('19:00');
@@ -222,7 +221,7 @@ class CitasController extends Controller implements HasMiddleware
         // dd($horas);
         $this->registrarMovimiento('editar cita de: '.$cita->cliente->correo, 'editar citas', $cita);
 
-        return view('citas.edit', compact('barberos', 'clientes', 'paquetes' ,'dia', 'fecha', 'horas', 'cita'));
+        return view('citas.edit', compact('barberos', 'clientes', 'paquetes' , 'horas', 'cita'));
 
     }
 
@@ -231,7 +230,7 @@ class CitasController extends Controller implements HasMiddleware
      */
     public function update(Request $request, string $id)
     {
-        $now_less_30min = Carbon::parse($request->hora)->subMinutes(30)->format('H:i');
+        $now_plus_30min = Carbon::now()->addMinutes(30)->format('H:i');
         $request->validate([
             'cliente_id' => 'required|exists:users,id',
             'barbero_id' => 'required|exists:users,id',
@@ -240,15 +239,30 @@ class CitasController extends Controller implements HasMiddleware
             'hora' => 'required|date_format:H:i|after:now_plus_30min',
         ],[
             'client_id.required' => 'Seleccione un cliente',
-            'barbero_id.required' => 'Seleccione un barbero',
+            'barbero_id.required' => 'Seleccionae un barbero',
             'paquete_id.required' => 'Seleccione un paquete',
             'fecha.required' => 'Seleccione una fecha',
             'hora.required' => 'Seleccione la hora',
-            'hora.after' => 'No puede cambiar la cita media hora antes de la hora'
+            'hora.after' => 'Solo puede crear citas despues de la próxima media hora'
         ]);
+        $cita = Citas::findOrFail($id);
         $dia = ucfirst(Carbon::parse($request->fecha)->locale('es')->isoFormat('dddd')); // día actual
         $barbero = User::findOrFail($request->barbero_id);
         $hora = $request->hora;
+        $isClient = false;
+
+
+        if($request->has('isclient')) {
+            $isClient = $request->query('isclient');
+        }
+
+        $existeCita = Citas::where('barbero_id', $request->barbero_id)
+            ->where('fecha', $request->fecha)
+            ->where('hora', $request->hora)
+            ->exists();
+        if ($existeCita) {
+            return back()->withErrors(['hora' => 'Ya existe una cita agendada para ese barbero a esa hora.']);
+        }
         
 
         $dentroHorario = $barbero->horarios->first(function ($horario) use ($dia, $hora, $request) {
@@ -275,7 +289,6 @@ class CitasController extends Controller implements HasMiddleware
         }
 
         // dd($request->all());
-        $cita = Citas::findOrFail($id);
         $cita->fill($request->all());
 
         $cita->dia = $dia;
@@ -283,12 +296,18 @@ class CitasController extends Controller implements HasMiddleware
         $cita->save();
 
         Mail::to($cita->cliente->email)->send(new CitaNotificadaMail($cita, EstadoCita::Editada->value));
+        Mail::to($cita->barbero->email)->send(new CitaNotificadaMail($cita, EstadoCita::Editada->value));
 
         $this->registrarMovimiento('actualizar cita de cliente: '.$cita->cliente->correo.'y barbero:'.$cita->barbero->correo, 'editar descansos', $cita);
 
         // Citas::create($request->all());
 
-        return redirect()->route('cita.index')->with('success', 'Cita actualizada correctamente');
+        if($isClient) {
+            return redirect()->route('dashboard');
+        } else {
+            return redirect()->route('cita.index')->with('success', 'Cita actualizada correctamente');
+        }
+        
     }
 
     /**

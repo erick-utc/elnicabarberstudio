@@ -26,24 +26,42 @@
                                 <p class="text-red-600">{{ $message }}</p>
                             @enderror
                         </div> --}}
-                        <label for="barbero_id" class="text-lg font-medium">Barbero</label>
+                        {{--<label for="barbero_id" class="text-lg font-medium">Barbero</label>
                         <div class="my-3">
-                            {{-- <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="user_id" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg"> --}}
+                             <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="user_id" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg"> 
                             <select name="barbero_id" class="border-gray-300 shadow-sm w-1/2 rounded-lg" id="barbero" value="{{ old('barbero_id', $cita->barbero->id) }}">
                                 @foreach ($barberos as $user)
-                                <option value="{{ $user->id }}" @selected(($user->name == Auth::user()->name)&&($user->primerApellido == Auth::user()->primerApellido)&&($user->segundoApellido == Auth::user()->segundoApellido))>{{ $user->name.' '.$user->primerApellido.' '.$user->segundoApellido }}</option>
+                                <option value="{{ $user->id }}" @selected($user->id == $cita->barbero->id)>{{ $user->name.' '.$user->primerApellido.' '.$user->segundoApellido }}</option>
                                 @endforeach
                             </select>
                             @error('barbero_id')
                                 <p class="text-red-600">{{ $message }}</p>
-                            @enderror
+                            @enderror--}}
+                            <label for="barbero_id" class="text-lg font-medium" >Barbero</label>
+                            <div class="my-3 grid grid-cols-3">
+                                @foreach ($barberos as $barbero)
+                                <x-barbero-card nombre="{{ $barbero->name }}" primerApellido="{{ $barbero->primerApellido }}" segundoApellido="{{ $barbero->segundoApellido }}" id="{{ $barbero->id }}" imgSrc="{{ Storage::url($barbero->profile_photo_path) }}" onchange="cargarHoras()" :cita="$cita"/>
+                                @endforeach
+                                
+                            </div>
+                            <div>
+                                @error('barbero_id')
+                                    <p class="text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
+                         <style>
+                            .ts-contol {
+                                font-size: inherit;
+                            }
+                        </style>
                         <label for="cliente_id" class="text-lg font-medium">Cliente</label>
                         <div class="my-3">
                             {{-- <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="user_id" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg"> --}}
-                            <select name="cliente_id" class="border-gray-300 shadow-sm w-1/2 rounded-lg" value="{{ old('cliente_id', $cita->cliente->id) }}">
+                            <select name="cliente_id" id="cliente_id" class="border-gray-300 shadow-sm w-1/2 rounded-lg tom-select !text-lg" value="{{ old('cliente_id', $cita->cliente->id) }}">
+                                <option value="">Seleccione el cliente</option>
                                 @foreach ($clientes as $user)
-                                <option value="{{ $user->id }}" @selected(($user->name == Auth::user()->name)&&($user->primerApellido == Auth::user()->primerApellido)&&($user->segundoApellido == Auth::user()->segundoApellido))>{{ $user->name.' '.$user->primerApellido.' '.$user->segundoApellido }}</option>
+                                <option value="{{ $user->id }}" @selected($user->id == $cita->cliente->id)>{{ $user->name.' '.$user->primerApellido.' '.$user->segundoApellido }}</option>
                                 @endforeach
                             </select>
                             @error('cliente_id')
@@ -55,7 +73,7 @@
                             {{-- <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="user_id" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg"> --}}
                             <select name="paquete_id" class="border-gray-300 shadow-sm w-1/2 rounded-lg" value="{{ old('paquete_id', $cita->paquete->id) }}">
                                 @foreach ($paquetes as $paquete)
-                                <option value="{{ $paquete->id }}">{{ $paquete->nombre.' '.$paquete->descripcion }}</option>
+                                <option value="{{ $paquete->id }}" @selected($paquete->id == $cita->paquete->id)>{{ $paquete->nombre.' '.$paquete->descripcion }}</option>
                                 @endforeach
                             </select>
                             @error('paquete_id')
@@ -77,20 +95,22 @@
                         </div> --}}
                         <label for="fecha" class="text-lg font-medium">Fecha</label>
                         <div class="my-3">
-                            <input value="{{ old('fecha', $cita->fecha) }}"name="fecha" type="date" class="border-gray-300 shadow-sm w-1/2 rounded-lg"  required>
+                            <input value="{{ old('fecha', $cita->fecha) }}" id="fecha" name="fecha" type="date" class="border-gray-300 shadow-sm w-1/2 rounded-lg" onchange="cargarHoras()" required>
                             @error('fecha')
                                 <p class="text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
                         <label for="hora" class="text-lg font-medium">Hora de la cita</label>
                         <div class="my-3">
+                            <x-loading/>
                             {{-- <input value="{{ old('name') }}" placeholder="Ingrese el nombre del cita" name="user_id" type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg"> --}}
-                            <select name="hora" class="border-gray-300 shadow-sm w-1/2 rounded-lg" value="{{ old('hora', $cita->hora) }}">
-                                @foreach ($horas as $hora)
+                            <select name="hora" id="hora" class="border-gray-300 shadow-sm w-1/2 rounded-lg" value="{{ old('hora', $cita->hora) }}">
+                                {{-- @foreach ($horas as $hora)
                                 <option  @selected($cita->hora == \Carbon\Carbon::parse($hora)->locale('es')->format("H:i")) value="{{ \Carbon\Carbon::parse($hora)->locale('es')->format("H:i") }}">{{ \Carbon\Carbon::parse($hora)->locale('es')->format("H:i") }}</option>
-                                @endforeach
+                                @endforeach --}}
+                                <option value="">Seleccione una hora</option>
                             </select>
-                            @error('paquete_id')
+                            @error('hora')
                                 <p class="text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -126,4 +146,65 @@
             </div>
         </div>
     </div>
+    <script>
+        function cargarHoras() {
+            const barberoId = document.getElementById('barbero_id').value || '{{ $cita->barbero->id }}';
+            const fecha = document.getElementById('fecha')?.value || '{{ $cita->fecha }}';
+            const horaSeleccionada = '{{ $cita->hora }}'
+            const loading = document.getElementById('loading');
+
+            if (!barberoId) return;
+
+            if(loading) {
+                loading.classList.remove('hidden');
+            }
+
+            fetch(`/barbero/horas-disponibles?barbero_id=${barberoId}&fecha=${fecha}`)
+                .then(res => res.json())
+                .then(data => {
+                    const selectHora = document.getElementById('hora');
+                    selectHora.innerHTML = '<option value="">Seleccione una hora</option>';
+
+                    data.horas_posibles.forEach(hora => {
+                        if (!data.horas_no_disponibles.includes(hora)) {
+                            const option = document.createElement('option');
+                            option.value = hora;
+                            option.innerText = hora;
+                            selectHora.appendChild(option);
+                        }
+                        
+                    });
+
+                    const option = document.createElement('option');
+                    option.value = horaSeleccionada;
+                    option.innerText = horaSeleccionada;
+                    option.selected = true;
+                    selectHora.appendChild(option);
+
+                    loading.classList.add('hidden');
+
+                    if (selectHora.options.length === 1) {
+                        const noOptions = document.createElement('option');
+                        noOptions.innerText = 'No hay horas disponibles';
+                        noOptions.disabled = true;
+                        selectHora.appendChild(noOptions);
+                    }
+                });
+        }
+    </script>
+    <!-- activar el tom select -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.0/dist/js/tom-select.complete.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(event) {
+            new TomSelect('#cliente_id', {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                }
+            });
+
+            cargarHoras();
+        });
+    </script>
 </x-app-layout>
